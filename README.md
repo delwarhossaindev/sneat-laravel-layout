@@ -396,6 +396,19 @@ Sneat-styled error pages [resources/views/errors/](resources/views/errors/) এ 
 
 🎯 Active-link highlighting Laravel এর `request()->routeIs()` helper দিয়ে করা।
 
+### 🎯 Active menu item auto-scroll (centered)
+
+[resources/views/layouts/app.blade.php](resources/views/layouts/app.blade.php) এ একটি ছোট inline script যোগ করা আছে, যা page load এর পর active sidebar menu item ke `.menu-inner` scroll container এর **vertically center** এ এনে দেয়। অনেক menu item থাকলে user কে আর scroll করে active page খুঁজতে হয় না।
+
+🤔 **কেন custom script দরকার?** Sneat এর built-in `Helpers.scrollToActive()` এ একটি 2/3 height guard থাকে — অর্থাৎ active item যদি menu এর top 2/3 অংশের মধ্যে থাকে, তাহলে scroll-ই করে না। আমাদের custom script সবসময় active item কে center এ নিয়ে আসে।
+
+⚙️ **কীভাবে কাজ করে:**
+
+- 🍃 `li.menu-item.active:not(.open)` দিয়ে deepest (leaf) active item খুঁজে — কারণ parent item গুলোতে `.active.open` class থাকে, leaf item এ শুধু `.active`
+- 📐 `getBoundingClientRect()` দিয়ে item এর offset হিসাব করে এবং `.menu-inner` এর `clientHeight / 2` থেকে item এর half-height বাদ দিয়ে scroll target নির্ধারণ করে
+- 🛡️ `Math.max(0, Math.min(target, scrollHeight - clientHeight))` দিয়ে clamp করে — top/bottom edge এ থাকলে bound cross করে না
+- 📡 `ps-scroll-y` event dispatch করে Perfect Scrollbar এর shadow indicator update করে
+
 দুইটি layout আছে:
 
 - 🔐 [resources/views/layouts/app.blade.php](resources/views/layouts/app.blade.php) — full admin layout (sidebar + navbar + footer), authenticated pages এর জন্য
