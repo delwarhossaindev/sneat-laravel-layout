@@ -97,6 +97,33 @@
     {{-- Main JS --}}
     <script src="{{ asset('assets/js/main.js') }}"></script>
 
+    {{-- Center active sidebar menu item on load --}}
+    <script>
+      (function () {
+        function centerActiveMenuItem() {
+          var menuInner = document.querySelector('#layout-menu .menu-inner');
+          if (!menuInner) return;
+          var actives = menuInner.querySelectorAll('li.menu-item.active');
+          if (!actives.length) return;
+          // Pick the deepest active (leaf). Parents have `.active.open`; leaf is just `.active`.
+          var leaf = menuInner.querySelector('li.menu-item.active:not(.open)') || actives[actives.length - 1];
+          var link = leaf.querySelector(':scope > .menu-link') || leaf;
+          var offsetTop = link.getBoundingClientRect().top - menuInner.getBoundingClientRect().top + menuInner.scrollTop;
+          var target = offsetTop - (menuInner.clientHeight / 2) + (link.offsetHeight / 2);
+          target = Math.max(0, Math.min(target, menuInner.scrollHeight - menuInner.clientHeight));
+          menuInner.scrollTop = target;
+          if (window.PerfectScrollbar && menuInner.querySelector('.ps__rail-y')) {
+            menuInner.dispatchEvent(new Event('ps-scroll-y'));
+          }
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function () { setTimeout(centerActiveMenuItem, 50); });
+        } else {
+          setTimeout(centerActiveMenuItem, 50);
+        }
+      })();
+    </script>
+
     {{-- Page JS --}}
     @stack('page-js')
 
