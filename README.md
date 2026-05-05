@@ -1,6 +1,6 @@
 # 🎨 Sneat Laravel Layout
 
-একটি production-ready Laravel 10 starter project, যেটি **[Sneat Bootstrap 5](https://themeselection.com/products/sneat-bootstrap-html-admin-template/) admin template** এর উপরে তৈরি। এতে আছে সম্পূর্ণ Role/Permission-based access control system, Sneat-styled authentication pages এবং custom error pages।
+একটি production-ready Laravel 10 starter project, যেটি **[Sneat Bootstrap 5](https://themeselection.com/products/sneat-bootstrap-html-admin-template/) admin template** এর উপরে তৈরি। এতে আছে সম্পূর্ণ Role/Permission-based access control, DB-driven dynamic sidebar, Sneat-styled authentication এবং custom error pages।
 
 🗄️ **MySQL**, **SQLite**, এবং **MSSQL** — তিনটি database driver-ই সাপোর্ট করে। শুধু `.env` ফাইলের একটি লাইন বদলালেই যেকোনো database এ চালানো যায়।
 
@@ -19,6 +19,7 @@
 - [🛣️ রাউট রেফারেন্স](#-রাউট-রেফারেন্স)
 - [🔑 অথেনটিকেশন](#-অথেনটিকেশন)
 - [❌ এরর পেজ](#-এরর-পেজ)
+- [🗂️ Menu Manager](#️-menu-manager)
 - [🎨 সাইডবার ও লেআউট](#-সাইডবার-ও-লেআউট)
 - [💡 দরকারি Artisan কমান্ড](#-দরকারি-artisan-কমান্ড)
 - [🔧 সমস্যা সমাধান (Troubleshooting)](#-সমস্যা-সমাধান-troubleshooting)
@@ -33,27 +34,28 @@
 - 🔑 **অথেনটিকেশন** — Login, Register, Forgot Password (Sneat-styled forms)
 - 🛡️ **Role-Based Access Control** — [spatie/laravel-permission](https://spatie.be/docs/laravel-permission) দিয়ে তৈরি
   - 3টি pre-seeded role: **Admin**, **Manager**, **User**
-  - 13টি granular permission (users, roles, permissions, dashboard)
+  - 17টি granular permission (users, roles, permissions, menus, dashboard)
   - **Admin** role স্বয়ংক্রিয়ভাবে সব permission check বাইপাস করে (`Gate::before` দিয়ে)
-- 📝 **CRUD ইন্টারফেস** — Users, Roles, এবং Permissions এর জন্য
+- 📝 **CRUD ইন্টারফেস** — Users, Roles, Permissions এবং **Menu Items** এর জন্য
+- 🗂️ **DB-driven Dynamic Sidebar** — Settings থেকে menu items add/edit/delete করলে sidebar instantly update হয়
 - 👁️ **Permission-aware sidebar** — logged-in user এর permission অনুযায়ী menu item স্বয়ংক্রিয়ভাবে hide হয়
-- 🎯 **`@can` / `@canany` Blade directives** — সব views এবং controllers এ ব্যবহৃত
+- 🎯 **Smart section header** — কোনো section এর নিচে visible item না থাকলে header নিজেই লুকিয়ে যায়
+- 🔄 **Active menu auto-scroll** — page load এ active sidebar item টি স্বয়ংক্রিয়ভাবে center এ scroll হয়
 - ❌ **Custom Sneat-styled error pages** (403, 404, 500, 503) — `public/svg/` এর illustrations সহ
 - 🗄️ **Multi-database support** — MySQL / SQLite / MSSQL, `.env` দিয়ে switch করা যায়
 - 📄 **Bootstrap 5 pagination** — Laravel paginator এর সাথে integrated
-- 🌐 **Bangla/English ready** — Laravel এর standard localization ব্যবহার করে
 
 ---
 
 ## 🛠️ টেক স্ট্যাক
 
 | 🔹 লেয়ার | 🔧 প্রযুক্তি |
-|-------|-----------|
+|---|---|
 | ⚡ Framework | Laravel 10.x |
 | 🐘 PHP | 8.1+ (PHP 8.3 এ tested) |
 | 🎨 Front-end | Sneat Bootstrap 5 + Boxicons + Public Sans font |
 | 📦 Build tool | Vite 5 |
-| 🔑 Auth | Laravel native sessions + Sanctum (API tokens এর জন্য) |
+| 🔑 Auth | Laravel native sessions + Sanctum |
 | 🛡️ Permissions | spatie/laravel-permission ^6.25 |
 | 🗄️ DB drivers | `pdo_mysql`, `pdo_sqlite`, `pdo_sqlsrv` |
 
@@ -61,14 +63,13 @@
 
 ## 📋 প্রয়োজনীয়তা
 
-- 🐘 **PHP 8.1+** — নিম্নলিখিত extensions সহ:
-  `pdo`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`
+- 🐘 **PHP 8.1+** — extensions: `pdo`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`
 - 📦 **Composer 2.x**
-- 🟢 **Node.js 18+ ও npm** (শুধু front-end assets rebuild করার দরকার হলে)
-- 🗄️ **যেকোনো একটি database server**:
+- 🟢 **Node.js 18+ ও npm** (শুধু front-end assets rebuild করতে চাইলে)
+- 🗄️ **যেকোনো একটি database**:
   - 🐬 MySQL 5.7+ / MariaDB 10.3+, **অথবা**
   - 📁 SQLite 3, **অথবা**
-  - 🪟 SQL Server 2017+ ([`pdo_sqlsrv`](https://learn.microsoft.com/en-us/sql/connect/php/microsoft-php-driver-for-sql-server) extension প্রয়োজন)
+  - 🪟 SQL Server 2017+ ([`pdo_sqlsrv`](https://learn.microsoft.com/en-us/sql/connect/php/microsoft-php-driver-for-sql-server) দরকার)
 
 ---
 
@@ -86,22 +87,22 @@ composer install
 cp .env.example .env
 php artisan key:generate
 
-# 4️⃣ .env এ DB credentials set করুন (নিচে "ডাটাবেস কনফিগারেশন" দেখুন)
+# 4️⃣ .env এ DB credentials set করুন (নিচে দেখুন)
 
-# 5️⃣ Migration চালান এবং sample data seed করুন
+# 5️⃣ Migration চালান এবং সব data seed করুন
 php artisan migrate --seed
 
-# 6️⃣ (Optional) Vite assets modify করতে চাইলে npm install করুন
-npm install
+# 6️⃣ (Optional) Vite assets rebuild করতে চাইলে
+npm install && npm run build
 ```
 
-> 💡 **নোট:** Sneat template এর সব assets আগে থেকেই pre-built অবস্থায় `public/assets/` এ আছে। তাই সাধারণ ব্যবহারের জন্য **`npm install` লাগবে না**।
+> 💡 **নোট:** Sneat template এর সব assets আগে থেকেই pre-built `public/assets/` এ আছে — সাধারণ ব্যবহারে **`npm install` লাগবে না**।
 
 ---
 
 ## 🗄️ ডাটাবেস কনফিগারেশন
 
-`.env` ফাইল edit করে `DB_CONNECTION` এর value তিনটার যেকোনো একটায় set করুন।
+`.env` ফাইলে `DB_CONNECTION` বদলে যেকোনো database ব্যবহার করুন।
 
 ### 🐬 MySQL (default)
 
@@ -114,7 +115,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-> ⚠️ `config/database.php` এ MySQL এর জন্য InnoDB engine enforce করা হয়েছে — Spatie এর composite unique indexes (`permissions` ও `roles` table এ) handle করার জন্য। `Schema::defaultStringLength(191)` শুধু MySQL এর জন্য auto-apply হয় ([app/Providers/AppServiceProvider.php](app/Providers/AppServiceProvider.php))।
+> ⚠️ MySQL এর জন্য InnoDB engine enforce করা আছে — Spatie এর composite unique index handle করতে। `Schema::defaultStringLength(191)` শুধু MySQL এ auto-apply হয় ([AppServiceProvider.php](app/Providers/AppServiceProvider.php))।
 
 ### 📁 SQLite
 
@@ -124,13 +125,11 @@ DB_DATABASE=database/database.sqlite
 ```
 
 ```bash
-touch database/database.sqlite       # খালি file তৈরি করুন
+touch database/database.sqlite
 php artisan migrate --seed
 ```
 
 ### 🪟 MSSQL (SQL Server)
-
-`pdo_sqlsrv` PHP extension দরকার। **WAMP এ এটা bundled থাকে না** — Microsoft এর official driver pack থেকে install করতে হবে।
 
 ```env
 DB_CONNECTION=sqlsrv
@@ -142,9 +141,7 @@ DB_PASSWORD=YourStrong!Password
 DB_TRUST_SERVER_CERTIFICATE=true
 ```
 
-### 🔄 ডাটাবেস switch করা
-
-`.env` এ `DB_CONNECTION` change করার পর:
+### 🔄 Database switch করা
 
 ```bash
 php artisan config:clear
@@ -159,15 +156,15 @@ php artisan migrate:fresh --seed
 php artisan serve
 ```
 
-🌐 Browser এ <http://localhost:8000> খুলুন। আপনাকে `/dashboard` এ redirect করবে (login না করা থাকলে `/login` এ যাবে)।
+🌐 Browser এ <http://localhost:8000> খুলুন।
 
 ### 👤 Pre-seeded test users
 
-সবার password হলো **`password`**।
+সবার password: **`password`**
 
 | 📧 ইমেইল | 🎭 রোল | 🔓 অ্যাক্সেস |
-|-------|------|--------|
-| `admin@example.com` | 👑 Admin | সম্পূর্ণ access (সব permission gate বাইপাস করে) |
+|---|---|---|
+| `admin@example.com` | 👑 Admin | সম্পূর্ণ access — সব gate বাইপাস |
 | `manager@example.com` | 👔 Manager | Dashboard + user view/create/edit + role view |
 | `user@example.com` | 👤 User | শুধু Dashboard |
 
@@ -178,114 +175,102 @@ php artisan serve
 ```
 sneat-laravel-layout/
 ├── 📁 app/
-│   ├── 📁 Http/
-│   │   ├── 📁 Controllers/
-│   │   │   ├── 📁 Auth/
-│   │   │   │   ├── 🔑 LoginController.php          # Login + logout
-│   │   │   │   ├── 📝 RegisterController.php       # Registration ("User" role auto-assign করে)
-│   │   │   │   └── 🔐 ForgotPasswordController.php # Password reset link
-│   │   │   ├── 🛡️ PermissionController.php         # Permissions CRUD
-│   │   │   ├── 🎭 RoleController.php               # Roles CRUD (permission attach সহ)
-│   │   │   └── 👤 UserController.php               # Users CRUD (role assignment সহ)
-│   │   └── 📁 Middleware/                          # Standard Laravel middleware + Authenticate
-│   │   └── ⚙️ Kernel.php                           # Spatie 'role'/'permission' aliases register করা
+│   ├── 📁 Http/Controllers/
+│   │   ├── 📁 Auth/
+│   │   │   ├── 🔑 LoginController.php           # Login + logout
+│   │   │   ├── 📝 RegisterController.php        # Registration (auto "User" role)
+│   │   │   └── 🔐 ForgotPasswordController.php  # Password reset link
+│   │   ├── 🗂️ MenuController.php                # Menu items CRUD
+│   │   ├── 🛡️ PermissionController.php          # Permissions CRUD
+│   │   ├── 🎭 RoleController.php                # Roles CRUD
+│   │   └── 👤 UserController.php                # Users CRUD
 │   ├── 📁 Models/
-│   │   └── 👤 User.php                             # HasRoles trait ব্যবহার করে
+│   │   ├── 🗂️ Menu.php                          # DB menu — parent/children, href(), isActive()
+│   │   └── 👤 User.php                          # HasRoles trait
 │   └── 📁 Providers/
-│       └── ⚙️ AppServiceProvider.php               # Admin এর জন্য Gate::before, Bootstrap pagination
-├── 📁 config/
-│   ├── 🔑 auth.php
-│   ├── 🗄️ database.php                             # 3টি DB driver-ই configured
-│   └── 🛡️ permission.php                           # Spatie permission config
+│       └── ⚙️ AppServiceProvider.php            # Gate::before + sidebar View Composer
 ├── 📁 database/
 │   ├── 📁 migrations/
-│   │   └── 📜 2026_04_27_*_create_permission_tables.php
+│   │   ├── 📜 *_create_permission_tables.php
+│   │   └── 📜 *_create_menus_table.php
 │   └── 📁 seeders/
 │       ├── 🌱 DatabaseSeeder.php
-│       ├── 🌱 RolesAndPermissionsSeeder.php        # 13 perms + 3 roles
-│       └── 🌱 UserSeeder.php                       # 3 test users
+│       ├── 🌱 RolesAndPermissionsSeeder.php     # 17 perms + 3 roles
+│       ├── 🌱 UserSeeder.php                    # 3 test users
+│       └── 🌱 MenuSeeder.php                   # 20 menu items (full sidebar)
 ├── 📁 public/
-│   ├── 🎨 assets/                                  # Sneat CSS/JS/fonts (pre-built)
-│   └── 🖼️ svg/                                     # 403/404/500/503 illustrations
+│   ├── 🎨 assets/                              # Sneat CSS/JS/fonts (pre-built)
+│   └── 🖼️ svg/                                 # 403/404/500/503 illustrations
 ├── 📁 resources/views/
-│   ├── 📁 auth/                                    # login, register, forgot-password
-│   ├── 📁 errors/                                  # Sneat-styled 403/404/500/503 + minimal layout
+│   ├── 📁 auth/                                # login, register, forgot-password
+│   ├── 📁 errors/                              # Sneat-styled error pages + minimal layout
 │   ├── 📁 layouts/
-│   │   ├── 🎨 app.blade.php                        # Authenticated layout (sidebar + navbar)
-│   │   ├── 🎨 auth.blade.php                       # Guest layout (centered card)
+│   │   ├── 🎨 app.blade.php                    # Authenticated layout (sidebar + navbar)
+│   │   ├── 🎨 auth.blade.php                   # Guest layout (centered card)
 │   │   └── 📁 partials/
-│   │       ├── 📋 sidebar.blade.php                # Permission-aware menu
+│   │       ├── 🗂️ sidebar.blade.php            # DB-driven dynamic menu render
 │   │       ├── 🧭 navbar.blade.php
-│   │       ├── 📝 footer.blade.php
-│   │       └── 🏷️ brand-logo.blade.php
+│   │       └── 📝 footer.blade.php
 │   └── 📁 pages/
 │       ├── 📊 dashboard.blade.php
+│       ├── 📁 menus/{index,create,edit,_form}.blade.php
 │       ├── 📁 users/{index,create,edit}.blade.php
 │       ├── 📁 roles/{index,create,edit,_form}.blade.php
 │       └── 📁 permissions/{index,create,edit}.blade.php
 └── 📁 routes/
-    └── 🛣️ web.php                                  # সব routes
+    └── 🛣️ web.php
 ```
 
 ---
 
 ## 🔐 Roles ও Permissions
 
-### 📜 Seeded permissions (13টি)
-
-[database/seeders/RolesAndPermissionsSeeder.php](database/seeders/RolesAndPermissionsSeeder.php) এ define করা:
+### 📜 Seeded permissions (17টি)
 
 | 📂 Group | 🔑 Permissions |
-|-------|-------------|
+|---|---|
 | 👤 User management | `user.view`, `user.create`, `user.edit`, `user.delete` |
 | 🎭 Role management | `role.view`, `role.create`, `role.edit`, `role.delete` |
 | 🛡️ Permission management | `permission.view`, `permission.create`, `permission.edit`, `permission.delete` |
+| 🗂️ Menu management | `menu.view`, `menu.create`, `menu.edit`, `menu.delete` |
 | 📊 Dashboard | `dashboard.view` |
 
 ### 🎭 Seeded roles
 
 | 🎭 Role | 🔑 Permissions |
-|------|-------------|
-| 👑 **Admin** | সব 13টি (এছাড়া `Gate::before` দিয়ে সব check বাইপাস করে) |
+|---|---|
+| 👑 **Admin** | সব 17টি + `Gate::before` দিয়ে সব check বাইপাস |
 | 👔 **Manager** | `dashboard.view`, `user.view/create/edit`, `role.view` |
 | 👤 **User** | `dashboard.view` |
 
 ### 🔒 Permissions কীভাবে enforce হয়
 
-তিনটি লেয়ারে কাজ করে:
+**তিনটি লেয়ারে:**
 
-1. **🛣️ Route middleware** — প্রতিটি route এ `permission:<name>` দিয়ে apply করা:
-   ```php
-   Route::get('/dashboard', ...)->middleware('permission:dashboard.view');
-   ```
+**1 — Route middleware**
+```php
+Route::get('/dashboard', ...)->middleware('permission:dashboard.view');
+```
 
-2. **⚙️ Controller constructor middleware** — প্রতিটি CRUD method gated:
-   ```php
-   public function __construct()
-   {
-       $this->middleware('permission:user.view')->only(['index', 'show']);
-       $this->middleware('permission:user.create')->only(['create', 'store']);
-       $this->middleware('permission:user.edit')->only(['edit', 'update']);
-       $this->middleware('permission:user.delete')->only(['destroy']);
-   }
-   ```
+**2 — Controller constructor**
+```php
+$this->middleware('permission:menu.view')->only(['index']);
+$this->middleware('permission:menu.create')->only(['create', 'store']);
+$this->middleware('permission:menu.edit')->only(['edit', 'update']);
+$this->middleware('permission:menu.delete')->only(['destroy']);
+```
 
-3. **🎨 Blade directives** — UI elements (button, menu) conditionally render হয়:
-   ```blade
-   @can('user.create')
-     <a href="{{ route('users.create') }}" class="btn btn-primary">Add User</a>
-   @endcan
-
-   @canany(['user.view', 'role.view', 'permission.view'])
-     <li class="menu-header">Administration</li>
-   @endcanany
-   ```
+**3 — Blade directives**
+```blade
+@can('menu.create')
+  <a href="{{ route('menus.create') }}" class="btn btn-primary">Add Item</a>
+@endcan
+```
 
 ### 👑 Admin bypass
 
-[app/Providers/AppServiceProvider.php](app/Providers/AppServiceProvider.php) এ `Gate::before` register করা — যাতে **Admin** role এর user explicit permission ছাড়াই সব authorization check pass করে:
-
 ```php
+// app/Providers/AppServiceProvider.php
 Gate::before(function ($user, $ability) {
     return $user->hasRole('Admin') ? true : null;
 });
@@ -293,20 +278,18 @@ Gate::before(function ($user, $ability) {
 
 ### 🛡️ Safety guards
 
-- ❌ **Admin** role delete করা যায় না ([RoleController::destroy](app/Http/Controllers/RoleController.php))
-- ❌ User নিজের account নিজে delete করতে পারে না ([UserController::destroy](app/Http/Controllers/UserController.php))
-- ✅ নতুন self-registered user-দের স্বয়ংক্রিয়ভাবে `User` role assign হয়
+- ❌ **Admin** role delete করা যায় না
+- ❌ User নিজের account নিজে delete করতে পারে না
+- ✅ Self-registered user-দের স্বয়ংক্রিয়ভাবে `User` role assign হয়
 
 ---
 
 ## 🛣️ রাউট রেফারেন্স
 
-সব routes [routes/web.php](routes/web.php) এ define করা।
+### 🌐 Guest routes
 
-### 🌐 Guest routes (`middleware: guest`)
-
-| 🔧 Method | 🔗 URI | 🎯 Controller | 🏷️ Name |
-|--------|-----|------------|------|
+| Method | URI | Controller | Name |
+|---|---|---|---|
 | GET | `/login` | `LoginController@showLoginForm` | `login` |
 | POST | `/login` | `LoginController@login` | — |
 | GET | `/register` | `RegisterController@showRegistrationForm` | `register` |
@@ -314,128 +297,255 @@ Gate::before(function ($user, $ability) {
 | GET | `/forgot-password` | `ForgotPasswordController@showLinkRequestForm` | `password.request` |
 | POST | `/forgot-password` | `ForgotPasswordController@sendResetLinkEmail` | `password.email` |
 
-### 🔐 Authenticated routes (`middleware: auth`)
+### 🔐 Authenticated routes
 
-| 🔧 Method | 🔗 URI | 🛡️ Permission gate | 🏷️ Name |
-|--------|-----|-----------------|------|
+| Method | URI | Permission gate | Name |
+|---|---|---|---|
 | POST | `/logout` | — | `logout` |
 | GET | `/dashboard` | `dashboard.view` | `dashboard` |
 | Resource | `/users` | `user.{view,create,edit,delete}` | `users.*` |
 | Resource | `/roles` | `role.{view,create,edit,delete}` | `roles.*` |
 | Resource | `/permissions` | `permission.{view,create,edit,delete}` | `permissions.*` |
+| Resource | `/menus` | `menu.{view,create,edit,delete}` | `menus.*` |
 
 ---
 
 ## 🔑 অথেনটিকেশন
 
-### 🚪 Login flow
+### 🚪 Login
 
-[app/Http/Controllers/Auth/LoginController.php](app/Http/Controllers/Auth/LoginController.php)
+- `email` + `password` validate → `Auth::attempt()` → session regenerate → `/dashboard`
+- "Remember me" checkbox সাপোর্ট করে
 
-- ✅ `email` + `password` validate করে
-- 🔐 Optional "Remember me" checkbox সহ `Auth::attempt()` call করে
-- 🔄 Success হলে session regenerate করে এবং intended URL এ redirect (default `/dashboard`)
-- ❌ Fail হলে standard `auth.failed` validation message throw করে
+### 📝 Registration
 
-### 📝 Registration flow
-
-[app/Http/Controllers/Auth/RegisterController.php](app/Http/Controllers/Auth/RegisterController.php)
-
-- ✅ Validate করে: `name`, `email` (unique), `password` (min 6, confirmed), `terms` (accepted হতে হবে)
-- 🔒 Password hash করে এবং user create করে
-- 👤 `$user->assignRole('User')` দিয়ে স্বয়ংক্রিয়ভাবে `User` role assign করে
-- 🚪 সঙ্গে সঙ্গে login করিয়ে `/dashboard` এ redirect করে
+- `name`, `email` (unique), `password` (min 6, confirmed), `terms` validate করে
+- Password bcrypt hash → user create → `User` role auto-assign → login → `/dashboard`
 
 ### 🔓 Password reset
 
-[app/Http/Controllers/Auth/ForgotPasswordController.php](app/Http/Controllers/Auth/ForgotPasswordController.php)
-
-- 📧 Laravel এর `Password` broker দিয়ে reset link পাঠায়
-- ⚠️ **নোট:** Email আসলেই send হওয়ার জন্য `.env` এ `MAIL_*` settings configure করতে হবে
+- Laravel `Password` broker দিয়ে reset link send করে
+- ⚠️ `.env` এ `MAIL_*` configure না করলে email যাবে না
 
 ---
 
 ## ❌ এরর পেজ
 
-Sneat-styled error pages [resources/views/errors/](resources/views/errors/) এ আছে। এগুলো `APP_DEBUG=false` থাকলে স্বয়ংক্রিয়ভাবে render হয়।
+`APP_DEBUG=false` থাকলে Laravel স্বয়ংক্রিয়ভাবে এগুলো দেখায়:
 
-| 🔢 Code | 📄 View | 🖼️ Illustration |
-|------|------|---------------|
-| 🚫 403  | `errors/403.blade.php` | `public/svg/403.svg` |
-| ❓ 404  | `errors/404.blade.php` | `public/svg/404.svg` |
-| 💥 500  | `errors/500.blade.php` | `public/svg/500.svg` |
-| 🔧 503  | `errors/503.blade.php` | `public/svg/503.svg` |
+| Code | View | Illustration | Trigger |
+|---|---|---|---|
+| 🚫 403 | `errors/403.blade.php` | `public/svg/403.svg` | Permission নেই |
+| ❓ 404 | `errors/404.blade.php` | `public/svg/404.svg` | Non-existent URL |
+| 💥 500 | `errors/500.blade.php` | `public/svg/500.svg` | Uncaught exception |
+| 🔧 503 | `errors/503.blade.php` | `public/svg/503.svg` | `php artisan down` |
 
-চারটিই [resources/views/errors/minimal.blade.php](resources/views/errors/minimal.blade.php) shared layout extend করে, যেটা Sneat এর `page-misc.css` styling ব্যবহার করে।
+চারটিই [errors/minimal.blade.php](resources/views/errors/minimal.blade.php) layout extend করে।
 
-### 🎯 প্রতিটি page কীভাবে trigger হয়
+---
 
-| 🔢 Code | ⚡ Trigger |
-|------|---------|
-| 🚫 403 | Permission নেই এমন user gated route এ visit করলে |
-| ❓ 404 | যেকোনো non-existent URL |
-| 💥 500 | Uncaught exception (শুধু `APP_DEBUG=false` এ দেখা যায়; নাহলে Ignition page দেখাবে) |
-| 🔧 503 | `php artisan down` চালালে; back করতে `php artisan up` |
+## 🗂️ Menu Manager
+
+> **Settings → Menu Manager** থেকে sidebar এর প্রতিটি item database এ manage করা যায়। কোনো code change ছাড়াই menu add, edit, reorder, বা hide করা সম্ভব।
+
+### 🏗️ `menus` Table Schema
+
+| Column | Type | বিবরণ |
+|---|---|---|
+| `id` | bigint PK | — |
+| `label` | string | Sidebar এ যা দেখাবে, যেমন `Dashboard` |
+| `type` | enum | `link` · `toggle` · `header` |
+| `icon` | string\|null | Boxicons class, যেমন `bx bx-home-circle` |
+| `route` | string\|null | Laravel named route, যেমন `users.index` |
+| `url` | string\|null | External URL (route না থাকলে fallback) |
+| `route_pattern` | string\|null | `routeIs()` pattern, যেমন `users.*` |
+| `permission` | string\|null | Spatie permission — blank হলে সবাই দেখবে |
+| `parent_id` | bigint\|null | FK → `menus.id` — শুধু `link` type এ ব্যবহার |
+| `sort_order` | smallint | ছোট সংখ্যা উপরে আসে |
+| `is_active` | boolean | `false` হলে sidebar এ দেখাবে না |
+| `target_blank` | boolean | External link নতুন tab এ খুলবে |
+
+### 🔖 Item Types
+
+```
+header  ──  Section title, যেমন "Administration", "Settings"
+            ► কোনো icon, route, বা parent নেই
+            ► নিচে কোনো visible item না থাকলে নিজেই লুকিয়ে যায়
+
+toggle  ──  Collapsible parent, যেমন "Access Control"
+            ► icon থাকে, route নেই (href = javascript:void)
+            ► child link গুলো menu-sub এ render হয়
+            ► অন্তত একটি visible child না থাকলে render হয় না
+
+link    ──  Regular menu item, যেমন "Dashboard", "Users"
+            ► icon, route/url, permission, parent_id সব থাকতে পারে
+            ► parent_id দিলে কোনো toggle এর sub-item হয়
+```
+
+### 🔄 Sidebar Rendering Flow
+
+```
+AppServiceProvider (View Composer)
+  └─► DB থেকে top-level active menus load (with activeChildren)
+        └─► sidebar.blade.php এ $sidebarMenus inject
+
+sidebar.blade.php
+  ├─ header  → pendingHeader এ রাখে (defer)
+  ├─ toggle  → visibleChildren filter করে
+  │           → কোনো child না থাকলে skip (pendingHeader ও বাদ)
+  │           → child থাকলে pendingHeader flush → toggle render
+  └─ link    → @can check → pass হলে pendingHeader flush → render
+```
+
+### ⚙️ Permission Check Logic
+
+```php
+// Model helper — Menu.php
+public function isActive(): bool
+{
+    $pattern = $this->route_pattern ?: $this->route;
+    return $pattern ? request()->routeIs($pattern) : false;
+}
+
+public function href(): string
+{
+    if ($this->route) {
+        return route($this->route);   // named route
+    }
+    return $this->url ?? 'javascript:void(0);';
+}
+```
+
+### 🌱 Seeded Menu Items (20টি)
+
+```
+sort  type     label
+────────────────────────────────
+  1   link     Dashboard          (permission: dashboard.view)
+ 10   header   Administration
+ 11   toggle   Access Control
+              └─  1  link  Users        (permission: user.view)
+              └─  2  link  Roles        (permission: role.view)
+              └─  3  link  Permissions  (permission: permission.view)
+ 20   header   Settings
+ 21   toggle   Settings
+              └─  1  link  Menu Manager (permission: menu.view)
+ 30   header   Components
+ 31   toggle   Layouts
+              └─  1-4  link  (Without menu / Container / Fluid / Blank)
+ 32   link     Cards
+ 33   link     Tables
+ 40   header   Misc
+ 41   link     Support       (target_blank)
+ 42   link     Documentation (target_blank)
+```
+
+### ✏️ নতুন Menu Item যোগ করার উদাহরণ
+
+ধরুন **Settings → Profile** নামে একটি link যোগ করতে চান:
+
+1. Sidebar এ **Settings → Menu Manager** → **Add Item** ক্লিক করুন
+2. ফর্মে দিন:
+   - **Label:** `Profile`
+   - **Type:** `Link`
+   - **Icon:** `bx bx-user-circle`
+   - **Named Route:** `profile.edit` _(অথবা External URL)_
+   - **Active Route Pattern:** `profile.*`
+   - **Permission:** _(blank = সবাই দেখবে)_
+   - **Parent Toggle:** `Settings`
+   - **Sort Order:** `2`
+   - **Active:** ✅
+3. **Create** — সঙ্গে সঙ্গে sidebar এ দেখাবে
 
 ---
 
 ## 🎨 সাইডবার ও লেআউট
 
-[resources/views/layouts/partials/sidebar.blade.php](resources/views/layouts/partials/sidebar.blade.php) এর sidebar logged-in user এর permission অনুযায়ী menu item auto-collapse এবং hide করে:
+Sidebar এখন **সম্পূর্ণ database-driven** — hardcoded HTML নেই।
 
-```blade
-@can('dashboard.view')
-  <li class="menu-item">…Dashboard…</li>
-@endcan
+### 📡 View Composer
 
-@canany(['user.view', 'role.view', 'permission.view'])
-  <li class="menu-header">Administration</li>
-  …
-@endcanany
+[app/Providers/AppServiceProvider.php](app/Providers/AppServiceProvider.php) এ register করা:
+
+```php
+View::composer('layouts.partials.sidebar', function ($view) {
+    $sidebarMenus = Menu::whereNull('parent_id')
+        ->where('is_active', true)
+        ->with(['activeChildren'])
+        ->orderBy('sort_order')
+        ->get();
+    $view->with('sidebarMenus', $sidebarMenus);
+});
 ```
 
-🎯 Active-link highlighting Laravel এর `request()->routeIs()` helper দিয়ে করা।
+### 🎯 Smart Header Hiding
 
-### 🎯 Active menu item auto-scroll (centered)
+কোনো `header` type item এর নিচে visible item না থাকলে সেই header টি render হয় না — "Administration" দেখাবে না যদি user এর কোনো ACL permission না থাকে:
 
-[resources/views/layouts/app.blade.php](resources/views/layouts/app.blade.php) এ একটি ছোট inline script যোগ করা আছে, যা page load এর পর active sidebar menu item ke `.menu-inner` scroll container এর **vertically center** এ এনে দেয়। অনেক menu item থাকলে user কে আর scroll করে active page খুঁজতে হয় না।
+```blade
+@php $pendingHeader = null; @endphp
+@foreach ($sidebarMenus as $menu)
+  @if ($menu->type === 'header')
+    @php $pendingHeader = $menu; @endphp   {{-- defer --}}
+  @elseif (/* item is visible */)
+    @if ($pendingHeader)
+      {{-- flush header only when a real item follows --}}
+      <li class="menu-header">{{ $pendingHeader->label }}</li>
+      @php $pendingHeader = null; @endphp
+    @endif
+    {{-- render item --}}
+  @endif
+@endforeach
+```
 
-🤔 **কেন custom script দরকার?** Sneat এর built-in `Helpers.scrollToActive()` এ একটি 2/3 height guard থাকে — অর্থাৎ active item যদি menu এর top 2/3 অংশের মধ্যে থাকে, তাহলে scroll-ই করে না। আমাদের custom script সবসময় active item কে center এ নিয়ে আসে।
+### 🔄 Active Menu Auto-Scroll (Centered)
 
-⚙️ **কীভাবে কাজ করে:**
+Page load এ active sidebar item টি `.menu-inner` এর vertically center এ আসে ([app.blade.php](resources/views/layouts/app.blade.php)):
 
-- 🍃 `li.menu-item.active:not(.open)` দিয়ে deepest (leaf) active item খুঁজে — কারণ parent item গুলোতে `.active.open` class থাকে, leaf item এ শুধু `.active`
-- 📐 `getBoundingClientRect()` দিয়ে item এর offset হিসাব করে এবং `.menu-inner` এর `clientHeight / 2` থেকে item এর half-height বাদ দিয়ে scroll target নির্ধারণ করে
-- 🛡️ `Math.max(0, Math.min(target, scrollHeight - clientHeight))` দিয়ে clamp করে — top/bottom edge এ থাকলে bound cross করে না
-- 📡 `ps-scroll-y` event dispatch করে Perfect Scrollbar এর shadow indicator update করে
+```js
+var leaf   = menuInner.querySelector('li.menu-item.active:not(.open)');
+var offset = link.getBoundingClientRect().top - menuInner.getBoundingClientRect().top
+             + menuInner.scrollTop;
+var target = offset - (menuInner.clientHeight / 2) + (link.offsetHeight / 2);
+menuInner.scrollTop = Math.max(0, Math.min(target, menuInner.scrollHeight - menuInner.clientHeight));
+```
 
-দুইটি layout আছে:
+> Sneat এর built-in `Helpers.scrollToActive()` এ 2/3 height guard আছে — active item উপরে থাকলে scroll করে না। এই custom script সবসময় center করে।
 
-- 🔐 [resources/views/layouts/app.blade.php](resources/views/layouts/app.blade.php) — full admin layout (sidebar + navbar + footer), authenticated pages এর জন্য
-- 🌐 [resources/views/layouts/auth.blade.php](resources/views/layouts/auth.blade.php) — minimal centered layout, guest pages এর জন্য
+### 🖼️ Layouts
+
+| Layout | Path | ব্যবহার |
+|---|---|---|
+| 🔐 Authenticated | [layouts/app.blade.php](resources/views/layouts/app.blade.php) | Sidebar + navbar + footer সহ সব logged-in page |
+| 🌐 Guest | [layouts/auth.blade.php](resources/views/layouts/auth.blade.php) | Centered card — login, register, forgot-password |
 
 ---
 
 ## 💡 দরকারি Artisan কমান্ড
 
 ```bash
-# 🔄 Migration scratch থেকে re-run + reseed (⚠️ DESTRUCTIVE — সব table drop করে)
+# 🔄 সব কিছু মুছে fresh start (⚠️ DESTRUCTIVE)
 php artisan migrate:fresh --seed
 
-# 🌱 শুধু role/permission/user data re-seed (firstOrCreate এর কারণে idempotent)
+# 🌱 শুধু permissions + roles re-seed
 php artisan db:seed --class=RolesAndPermissionsSeeder
+
+# 🌱 শুধু menu items re-seed (⚠️ truncate করে)
+php artisan db:seed --class=MenuSeeder
+
+# 🌱 শুধু test users re-seed
 php artisan db:seed --class=UserSeeder
 
-# 🧹 সব cache clear (config, route, view, compiled)
+# 🧹 সব cache clear
 php artisan optimize:clear
 
-# 🛣️ সব routes inspect করুন (middleware সহ)
+# 🛣️ সব routes দেখুন
 php artisan route:list
 
-# 🔍 Tinker REPL — ad-hoc DB queries এর জন্য
+# 🔍 DB ad-hoc queries
 php artisan tinker
 
-# 🔧 Maintenance mode toggle (503 page trigger করে)
+# 🔧 Maintenance mode
 php artisan down
 php artisan up
 ```
@@ -446,34 +556,41 @@ php artisan up
 
 ### ❌ `Target class [permission] does not exist`
 
-[app/Http/Kernel.php](app/Http/Kernel.php) এ Spatie এর middleware aliases missing। নিম্নলিখিতভাবে register করতে হবে:
+[app/Http/Kernel.php](app/Http/Kernel.php) এ Spatie middleware aliases নেই:
 
 ```php
-'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+'role'               => \Spatie\Permission\Middleware\RoleMiddleware::class,
+'permission'         => \Spatie\Permission\Middleware\PermissionMiddleware::class,
 'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
 ```
 
-### ❌ `SQLSTATE[42000]: Specified key was too long; max key length is 1000 bytes`
+### ❌ Sidebar blank / menu দেখাচ্ছে না
 
-আপনার MySQL `utf8mb4` সহ MyISAM ব্যবহার করছে। `config/database.php` এ engine InnoDB তে pin করা আছে, কিন্তু cached config clear করতে হবে:
+`menus` table empty — seed চালানো হয়নি:
 
 ```bash
-php artisan config:clear
-php artisan migrate:fresh
+php artisan db:seed --class=MenuSeeder
 ```
 
-### ❌ `Cannot make non static method Illuminate\Routing\Controller::middleware() static`
+### ❌ `SQLSTATE[42000]: Specified key was too long`
 
-`HasMiddleware` interface এবং static `middleware()` method Laravel 11+ এর feature। এই project Laravel 10 ব্যবহার করে, তাই middleware controller constructor এ register করতে হবে — working pattern এর জন্য [UserController](app/Http/Controllers/UserController.php) দেখুন।
+MySQL MyISAM ব্যবহার করছে। Cache clear করুন:
+
+```bash
+php artisan config:clear && php artisan migrate:fresh
+```
+
+### ❌ `Cannot make non static method Controller::middleware() static`
+
+Laravel 11+ এর feature এই project এ use করা হয়েছে। Laravel 10 এ middleware controller constructor এ দিতে হয় — [MenuController.php](app/Http/Controllers/MenuController.php) এর pattern follow করুন।
 
 ### ❌ MSSQL connection refused
-
-`pdo_sqlsrv` extension install করা এবং `php.ini` তে enable আছে কিনা check করুন:
 
 ```bash
 php -m | grep sqlsrv
 ```
+
+`pdo_sqlsrv` না থাকলে Microsoft এর official driver pack install করুন।
 
 ---
 
@@ -487,9 +604,10 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 php artisan migrate --force
+php artisan db:seed --class=MenuSeeder   # প্রথমবার deploy এ
 ```
 
-### ⚙️ Production এর জন্য `.env`
+### ⚙️ Production `.env`
 
 ```env
 APP_ENV=production
@@ -499,13 +617,13 @@ LOG_LEVEL=error
 SESSION_SECURE_COOKIE=true
 ```
 
-> 💡 `APP_DEBUG=false` থাকলে Laravel `resources/views/errors/` এর custom error pages render করবে, Ignition debug page এর বদলে।
+> 💡 `APP_DEBUG=false` থাকলে custom error pages দেখাবে, Ignition debug page নয়।
 
 ---
 
 ## 📄 লাইসেন্স
 
-🆓 এই project [MIT license](https://opensource.org/licenses/MIT) এর অধীনে open-source।
+🆓 এই project [MIT License](https://opensource.org/licenses/MIT) এর অধীনে open-source।
 
 🎨 Sneat Bootstrap admin template [ThemeSelection](https://themeselection.com) এর property এবং তাদের free license terms এর অধীনে included।
 

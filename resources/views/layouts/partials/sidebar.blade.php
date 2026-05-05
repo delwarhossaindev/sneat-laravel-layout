@@ -44,97 +44,70 @@
   <div class="menu-inner-shadow"></div>
 
   <ul class="menu-inner py-1">
-    {{-- Dashboard --}}
-    @can('dashboard.view')
-      <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-        <a href="{{ route('dashboard') }}" class="menu-link">
-          <i class="menu-icon tf-icons bx bx-home-circle"></i>
-          <div data-i18n="Analytics">Dashboard</div>
-        </a>
-      </li>
-    @endcan
+    @php $pendingHeader = null; @endphp
 
-    {{-- Admin Section --}}
-    @canany(['user.view', 'role.view', 'permission.view'])
-      <li class="menu-header small text-uppercase">
-        <span class="menu-header-text">Administration</span>
-      </li>
+    @foreach ($sidebarMenus as $menu)
 
-      @canany(['user.view', 'role.view', 'permission.view'])
-        <li class="menu-item {{ request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('permissions.*') ? 'active open' : '' }}">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-shield-quarter"></i>
-            <div>Access Control</div>
-          </a>
-          <ul class="menu-sub">
-            @can('user.view')
-              <li class="menu-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
-                <a href="{{ route('users.index') }}" class="menu-link">
-                  <div>Users</div>
-                </a>
-              </li>
-            @endcan
-            @can('role.view')
-              <li class="menu-item {{ request()->routeIs('roles.*') ? 'active' : '' }}">
-                <a href="{{ route('roles.index') }}" class="menu-link">
-                  <div>Roles</div>
-                </a>
-              </li>
-            @endcan
-            @can('permission.view')
-              <li class="menu-item {{ request()->routeIs('permissions.*') ? 'active' : '' }}">
-                <a href="{{ route('permissions.index') }}" class="menu-link">
-                  <div>Permissions</div>
-                </a>
-              </li>
-            @endcan
-          </ul>
-        </li>
-      @endcanany
-    @endcanany
+      @if ($menu->type === 'header')
+        @php $pendingHeader = $menu; @endphp
 
-    {{-- Layouts (demo) --}}
-    <li class="menu-header small text-uppercase">
-      <span class="menu-header-text">Components</span>
-    </li>
-    <li class="menu-item">
-      <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons bx bx-layout"></i>
-        <div data-i18n="Layouts">Layouts</div>
-      </a>
-      <ul class="menu-sub">
-        <li class="menu-item"><a href="javascript:void(0);" class="menu-link"><div>Without menu</div></a></li>
-        <li class="menu-item"><a href="javascript:void(0);" class="menu-link"><div>Container</div></a></li>
-        <li class="menu-item"><a href="javascript:void(0);" class="menu-link"><div>Fluid</div></a></li>
-        <li class="menu-item"><a href="javascript:void(0);" class="menu-link"><div>Blank</div></a></li>
-      </ul>
-    </li>
-    <li class="menu-item">
-      <a href="javascript:void(0);" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-collection"></i>
-        <div>Cards</div>
-      </a>
-    </li>
-    <li class="menu-item">
-      <a href="javascript:void(0);" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-table"></i>
-        <div>Tables</div>
-      </a>
-    </li>
+      @elseif ($menu->type === 'toggle')
+        @php
+          $visibleChildren = $menu->activeChildren->filter(
+            fn($c) => !$c->permission || auth()->user()->can($c->permission)
+          );
+          $isParentActive = $visibleChildren->contains(fn($c) => $c->isActive());
+        @endphp
+        @if ($visibleChildren->isNotEmpty())
+          @if ($pendingHeader)
+            <li class="menu-header small text-uppercase">
+              <span class="menu-header-text">{{ $pendingHeader->label }}</span>
+            </li>
+            @php $pendingHeader = null; @endphp
+          @endif
+          <li class="menu-item {{ $isParentActive ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+              @if ($menu->icon)
+                <i class="menu-icon tf-icons {{ $menu->icon }}"></i>
+              @endif
+              <div>{{ $menu->label }}</div>
+            </a>
+            <ul class="menu-sub">
+              @foreach ($visibleChildren as $child)
+                <li class="menu-item {{ $child->isActive() ? 'active' : '' }}">
+                  <a href="{{ $child->href() }}" class="menu-link"
+                     @if($child->target_blank) target="_blank" @endif>
+                    @if ($child->icon)
+                      <i class="menu-icon tf-icons {{ $child->icon }}"></i>
+                    @endif
+                    <div>{{ $child->label }}</div>
+                  </a>
+                </li>
+              @endforeach
+            </ul>
+          </li>
+        @endif
 
-    {{-- Misc --}}
-    <li class="menu-header small text-uppercase"><span class="menu-header-text">Misc</span></li>
-    <li class="menu-item">
-      <a href="https://github.com/themeselection/sneat-html-admin-template-free/issues" target="_blank" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-support"></i>
-        <div>Support</div>
-      </a>
-    </li>
-    <li class="menu-item">
-      <a href="https://themeselection.com/demo/sneat-bootstrap-html-admin-template/documentation/" target="_blank" class="menu-link">
-        <i class="menu-icon tf-icons bx bx-file"></i>
-        <div>Documentation</div>
-      </a>
-    </li>
+      @else {{-- link --}}
+        @if (!$menu->permission || auth()->user()->can($menu->permission))
+          @if ($pendingHeader)
+            <li class="menu-header small text-uppercase">
+              <span class="menu-header-text">{{ $pendingHeader->label }}</span>
+            </li>
+            @php $pendingHeader = null; @endphp
+          @endif
+          <li class="menu-item {{ $menu->isActive() ? 'active' : '' }}">
+            <a href="{{ $menu->href() }}" class="menu-link"
+               @if($menu->target_blank) target="_blank" @endif>
+              @if ($menu->icon)
+                <i class="menu-icon tf-icons {{ $menu->icon }}"></i>
+              @endif
+              <div data-i18n="{{ $menu->label }}">{{ $menu->label }}</div>
+            </a>
+          </li>
+        @endif
+
+      @endif
+    @endforeach
   </ul>
 </aside>
