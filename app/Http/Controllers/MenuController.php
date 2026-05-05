@@ -18,10 +18,11 @@ class MenuController extends Controller
 
     public function index()
     {
+        $perPage = in_array(request('per_page'), [10, 25, 50, 100]) ? request('per_page') : 10;
         $menus = Menu::with('parent')
             ->orderBy('sort_order')
             ->orderBy('id')
-            ->paginate(20);
+            ->paginate($perPage);
 
         return view('pages.menus.index', compact('menus'));
     }

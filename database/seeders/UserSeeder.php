@@ -10,6 +10,12 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        $superAdmin = User::firstOrCreate(
+            ['email' => 'superadmin@example.com'],
+            ['name' => 'Super Admin', 'password' => Hash::make('password')]
+        );
+        $superAdmin->syncRoles(['Admin']);
+
         $admin = User::firstOrCreate(
             ['email' => 'admin@example.com'],
             ['name' => 'Admin User', 'password' => Hash::make('password')]

@@ -20,7 +20,8 @@ class UserController extends Controller
 
     public function index()
     {
-        $users = User::with('roles')->paginate(10);
+        $perPage = in_array(request('per_page'), [10, 25, 50, 100]) ? request('per_page') : 10;
+        $users = User::with('roles')->paginate($perPage);
         return view('pages.users.index', compact('users'));
     }
 
