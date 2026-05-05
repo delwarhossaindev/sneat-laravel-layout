@@ -16,7 +16,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $permissions = [
             'user.view', 'user.create', 'user.edit', 'user.delete',
             'role.view', 'role.create', 'role.edit', 'role.delete',
-            'permission.view', 'permission.create', 'permission.edit', 'permission.delete',
+            'permission.view', 'permission.create', 'permission.edit', 'permission.delete', 'permission.assign',
             'menu.view', 'menu.create', 'menu.edit', 'menu.delete',
             'dashboard.view',
         ];

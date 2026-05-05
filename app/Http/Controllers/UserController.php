@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 use Spatie\Permission\Models\Role;
 
@@ -18,11 +19,22 @@ class UserController extends Controller
         $this->middleware('permission:user.delete')->only(['destroy']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $perPage = in_array(request('per_page'), [10, 25, 50, 100]) ? request('per_page') : 10;
-        $users = User::with('roles')->paginate($perPage);
-        return view('pages.users.index', compact('users'));
+        $search  = trim((string) $request->input('q'));
+
+        $users = User::with('roles')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return view('pages.users.index', compact('users', 'search'));
     }
 
     public function create()
@@ -34,17 +46,24 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::min(6)],
-            'roles' => ['array'],
-            'roles.*' => ['exists:roles,name'],
+            'avatar'   => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'roles'    => ['array'],
+            'roles.*'  => ['exists:roles,name'],
         ]);
 
+        $avatarPath = null;
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        }
+
         $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
+            'name'     => $data['name'],
+            'email'    => $data['email'],
             'password' => Hash::make($data['password']),
+            'avatar'   => $avatarPath,
         ]);
 
         $user->syncRoles($data['roles'] ?? []);
@@ -62,20 +81,34 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email,' . $user->id],
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'email', 'unique:users,email,' . $user->id],
             'password' => ['nullable', 'confirmed', Password::min(6)],
-            'roles' => ['array'],
-            'roles.*' => ['exists:roles,name'],
+            'avatar'   => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'roles'    => ['array'],
+            'roles.*'  => ['exists:roles,name'],
         ]);
 
-        $user->name = $data['name'];
+        $user->name  = $data['name'];
         $user->email = $data['email'];
+
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }
-        $user->save();
 
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            $user->avatar = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        if ($request->boolean('remove_avatar') && $user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+            $user->avatar = null;
+        }
+
+        $user->save();
         $user->syncRoles($data['roles'] ?? []);
 
         return redirect()->route('users.index')->with('status', 'User updated.');
@@ -85,6 +118,10 @@ class UserController extends Controller
     {
         if (auth()->id() === $user->id) {
             return back()->withErrors(['error' => 'You cannot delete your own account.']);
+        }
+
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
         }
 
         $user->delete();

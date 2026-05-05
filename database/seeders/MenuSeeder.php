@@ -42,6 +42,11 @@ class MenuSeeder extends Seeder
             'route' => 'permissions.index', 'route_pattern' => 'permissions.*',
             'permission' => 'permission.view', 'parent_id' => $acl->id, 'sort_order' => 3,
         ]);
+        Menu::create([
+            'label' => 'Assign Permissions', 'type' => 'link',
+            'route' => 'assign-permissions.index', 'route_pattern' => 'assign-permissions.*',
+            'permission' => 'permission.assign', 'parent_id' => $acl->id, 'sort_order' => 4,
+        ]);
 
         // ── Settings ───────────────────────────────────────────────
         Menu::create(['label' => 'Settings', 'type' => 'header', 'sort_order' => 20]);

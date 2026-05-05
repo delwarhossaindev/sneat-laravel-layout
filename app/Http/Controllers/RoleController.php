@@ -16,11 +16,17 @@ class RoleController extends Controller
         $this->middleware('permission:role.delete')->only(['destroy']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $perPage = in_array(request('per_page'), [10, 25, 50, 100]) ? request('per_page') : 10;
-        $roles = Role::with('permissions')->paginate($perPage);
-        return view('pages.roles.index', compact('roles'));
+        $search  = trim((string) $request->input('q'));
+
+        $roles = Role::with('permissions')
+            ->when($search !== '', fn ($q) => $q->where('name', 'like', "%{$search}%"))
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return view('pages.roles.index', compact('roles', 'search'));
     }
 
     public function create()

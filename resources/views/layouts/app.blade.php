@@ -1,7 +1,8 @@
 <!DOCTYPE html>
+@php $userTheme = auth()->user()?->theme ?? 'light'; @endphp
 <html
   lang="en"
-  class="light-style layout-menu-fixed"
+  class="light-style layout-menu-fixed {{ $userTheme === 'dark' ? 'dark-mode' : '' }}"
   dir="ltr"
   data-theme="theme-default"
   data-assets-path="{{ asset('assets') }}/"
@@ -37,6 +38,7 @@
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" class="template-customizer-core-css" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/theme-default.css') }}" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/dark-mode.css') }}" />
 
     {{-- Vendors CSS --}}
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
@@ -114,6 +116,29 @@
         } else {
           setTimeout(centerActiveMenuItem, 50);
         }
+      })();
+    </script>
+
+    {{-- Theme toggle --}}
+    <script>
+      (function () {
+        var btn = document.getElementById('themeToggle');
+        if (!btn) return;
+        btn.addEventListener('click', function () {
+          var html = document.documentElement;
+          var isDark = html.classList.toggle('dark-mode');
+          var icon = btn.querySelector('i');
+          if (icon) icon.className = isDark ? 'bx bx-sun fs-4 lh-0' : 'bx bx-moon fs-4 lh-0';
+          fetch('{{ route('preferences.theme') }}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ theme: isDark ? 'dark' : 'light' })
+          });
+        });
       })();
     </script>
 

@@ -16,15 +16,19 @@ class MenuController extends Controller
         $this->middleware('permission:menu.delete')->only(['destroy']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $perPage = in_array(request('per_page'), [10, 25, 50, 100]) ? request('per_page') : 10;
+        $search  = trim((string) $request->input('q'));
+
         $menus = Menu::with('parent')
+            ->when($search !== '', fn ($q) => $q->where('label', 'like', "%{$search}%"))
             ->orderBy('sort_order')
             ->orderBy('id')
-            ->paginate($perPage);
+            ->paginate($perPage)
+            ->withQueryString();
 
-        return view('pages.menus.index', compact('menus'));
+        return view('pages.menus.index', compact('menus', 'search'));
     }
 
     public function create()

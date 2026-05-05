@@ -7,11 +7,25 @@
 
 
 <div class="card">
-  <div class="card-header d-flex justify-content-between align-items-center">
+  <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
     <h5 class="mb-0">All Menu Items</h5>
-    @can('menu.create')
-      <a href="{{ route('menus.create') }}" class="btn btn-primary"><i class="bx bx-plus"></i> Add Item</a>
-    @endcan
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <form method="GET" class="d-flex" role="search">
+        <div class="input-group input-group-sm" style="width:240px">
+          <span class="input-group-text"><i class="bx bx-search"></i></span>
+          <input type="text" name="q" class="form-control"
+                 placeholder="Search menu label..."
+                 value="{{ $search ?? '' }}">
+          @if (!empty($search))
+            <a href="{{ route('menus.index') }}" class="btn btn-outline-secondary"
+               title="Clear"><i class="bx bx-x"></i></a>
+          @endif
+        </div>
+      </form>
+      @can('menu.create')
+        <a href="{{ route('menus.create') }}" class="btn btn-primary"><i class="bx bx-plus"></i> Add Item</a>
+      @endcan
+    </div>
   </div>
   <div class="table-responsive text-nowrap">
     <table class="table table-hover">

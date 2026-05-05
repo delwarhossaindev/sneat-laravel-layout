@@ -15,11 +15,17 @@ class PermissionController extends Controller
         $this->middleware('permission:permission.delete')->only(['destroy']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $perPage = in_array(request('per_page'), [10, 25, 50, 100]) ? request('per_page') : 10;
-        $permissions = Permission::orderBy('name')->paginate($perPage);
-        return view('pages.permissions.index', compact('permissions'));
+        $search  = trim((string) $request->input('q'));
+
+        $permissions = Permission::orderBy('name')
+            ->when($search !== '', fn ($q) => $q->where('name', 'like', "%{$search}%"))
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return view('pages.permissions.index', compact('permissions', 'search'));
     }
 
     public function create()

@@ -1,0 +1,193 @@
+/* ==========================================================================
+   Dark mode overrides for Sneat (free) — applied when <html class="dark-mode">
+   ========================================================================== */
+
+html.dark-mode {
+  color-scheme: dark;
+}
+
+/* Body & content */
+html.dark-mode body,
+html.dark-mode .layout-wrapper,
+html.dark-mode .content-wrapper {
+  background-color: #25293c !important;
+  color: #d4d6de;
+}
+
+html.dark-mode .text-muted { color: #8a8d93 !important; }
+html.dark-mode .text-body { color: #d4d6de !important; }
+html.dark-mode .text-dark, html.dark-mode .text-heading,
+html.dark-mode h1, html.dark-mode h2, html.dark-mode h3,
+html.dark-mode h4, html.dark-mode h5, html.dark-mode h6,
+html.dark-mode .fw-bold { color: #e7e8ec !important; }
+
+/* Cards */
+html.dark-mode .card,
+html.dark-mode .bg-white,
+html.dark-mode .bg-light {
+  background-color: #2f3349 !important;
+  color: #d4d6de;
+  border-color: rgba(255,255,255,0.05);
+}
+html.dark-mode .card-header,
+html.dark-mode .card-footer {
+  background-color: transparent;
+  border-color: rgba(255,255,255,0.06);
+  color: #e7e8ec;
+}
+
+/* Sidebar (menu) */
+html.dark-mode .bg-menu-theme,
+html.dark-mode #layout-menu {
+  background-color: #2f3349 !important;
+}
+html.dark-mode .bg-menu-theme .menu-link,
+html.dark-mode .bg-menu-theme .menu-header-text {
+  color: #b6b8c0 !important;
+}
+html.dark-mode .bg-menu-theme .menu-item.active > .menu-link {
+  background-color: rgba(105, 108, 255, 0.16) !important;
+  color: #fff !important;
+}
+html.dark-mode .bg-menu-theme .menu-link:hover {
+  background-color: rgba(255,255,255,0.04) !important;
+  color: #fff !important;
+}
+html.dark-mode .bg-menu-theme .menu-sub {
+  background-color: transparent;
+}
+html.dark-mode .menu-inner-shadow {
+  background: linear-gradient(#2f3349 41%, rgba(47,51,73,0.11) 95%, rgba(47,51,73,0)) !important;
+}
+html.dark-mode .app-brand-text { color: #e7e8ec !important; }
+
+/* Navbar */
+html.dark-mode .bg-navbar-theme,
+html.dark-mode #layout-navbar {
+  background-color: #2f3349 !important;
+}
+html.dark-mode #layout-navbar .form-control,
+html.dark-mode #layout-navbar input { color: #d4d6de; }
+html.dark-mode #layout-navbar input::placeholder { color: #8a8d93; }
+
+/* Footer */
+html.dark-mode .bg-footer-theme {
+  background-color: #2f3349 !important;
+  color: #b6b8c0;
+}
+
+/* Tables */
+html.dark-mode .table {
+  --bs-table-bg: transparent;
+  --bs-table-color: #d4d6de;
+  --bs-table-border-color: rgba(255,255,255,0.06);
+  --bs-table-hover-bg: rgba(255,255,255,0.03);
+  --bs-table-hover-color: #fff;
+  color: #d4d6de;
+}
+html.dark-mode .table thead th { color: #b6b8c0; border-color: rgba(255,255,255,0.06); }
+html.dark-mode .table-hover > tbody > tr:hover > * {
+  background-color: rgba(255,255,255,0.04) !important;
+  color: #fff !important;
+}
+
+/* Form controls */
+html.dark-mode .form-control,
+html.dark-mode .form-select,
+html.dark-mode textarea {
+  background-color: #25293c !important;
+  border-color: rgba(255,255,255,0.1);
+  color: #d4d6de;
+}
+html.dark-mode .form-control:focus,
+html.dark-mode .form-select:focus {
+  background-color: #25293c !important;
+  border-color: #696cff;
+  color: #fff;
+  box-shadow: 0 0 0 0.15rem rgba(105,108,255,0.25);
+}
+html.dark-mode .form-control::placeholder { color: #6b6e7a; }
+html.dark-mode .form-label { color: #d4d6de; }
+html.dark-mode .form-text { color: #8a8d93 !important; }
+html.dark-mode .input-group-text {
+  background-color: #25293c !important;
+  border-color: rgba(255,255,255,0.1);
+  color: #d4d6de;
+}
+
+/* Dropdowns */
+html.dark-mode .dropdown-menu {
+  background-color: #2f3349;
+  border-color: rgba(255,255,255,0.08);
+  color: #d4d6de;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+}
+html.dark-mode .dropdown-item { color: #d4d6de; }
+html.dark-mode .dropdown-item:hover,
+html.dark-mode .dropdown-item:focus {
+  background-color: rgba(255,255,255,0.05);
+  color: #fff;
+}
+html.dark-mode .dropdown-divider { border-color: rgba(255,255,255,0.08); }
+
+/* Buttons */
+html.dark-mode .btn-outline-secondary {
+  color: #b6b8c0;
+  border-color: rgba(255,255,255,0.15);
+}
+html.dark-mode .btn-outline-secondary:hover {
+  background-color: rgba(255,255,255,0.06);
+  color: #fff;
+}
+html.dark-mode .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Pagination */
+html.dark-mode .pagination .page-link {
+  background-color: transparent;
+  border-color: rgba(255,255,255,0.08);
+  color: #d4d6de;
+}
+html.dark-mode .pagination .page-link:hover {
+  background-color: rgba(255,255,255,0.06);
+  color: #fff;
+}
+html.dark-mode .pagination .page-item.active .page-link {
+  background-color: #696cff;
+  border-color: #696cff;
+  color: #fff;
+}
+html.dark-mode .pagination .page-item.disabled .page-link {
+  background-color: transparent;
+  color: #6b6e7a;
+}
+
+/* Toasts (sneat-toast) */
+html.dark-mode .sneat-toast {
+  background: #2f3349;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+}
+html.dark-mode .sneat-toast--success { background: #1d3327; }
+html.dark-mode .sneat-toast--warning { background: #3a2c1c; }
+html.dark-mode .sneat-toast--info    { background: #1a3134; }
+html.dark-mode .sneat-toast--error   { background: #3a1f21; }
+html.dark-mode .sneat-toast__msg     { color: #b6b8c0; }
+
+/* Badges (label variants) */
+html.dark-mode .bg-label-primary   { background-color: rgba(105,108,255,0.18) !important; color: #a6a8ff !important; }
+html.dark-mode .bg-label-secondary { background-color: rgba(138,141,147,0.18) !important; color: #b6b8c0 !important; }
+html.dark-mode .bg-label-success   { background-color: rgba(40,199,111,0.18) !important; color: #65cf91 !important; }
+html.dark-mode .bg-label-info      { background-color: rgba(0,207,232,0.18) !important; color: #51d8ec !important; }
+html.dark-mode .bg-label-warning   { background-color: rgba(255,159,67,0.18) !important; color: #ffb077 !important; }
+html.dark-mode .bg-label-danger    { background-color: rgba(234,84,85,0.18) !important; color: #ef7e7f !important; }
+
+/* Code & invalid feedback */
+html.dark-mode code { color: #ff8595; background-color: rgba(255,255,255,0.04); padding: 1px 4px; border-radius: 3px; }
+
+/* Borders */
+html.dark-mode .border, html.dark-mode .border-top, html.dark-mode .border-bottom,
+html.dark-mode .border-start, html.dark-mode .border-end {
+  border-color: rgba(255,255,255,0.06) !important;
+}
+html.dark-mode hr { border-color: rgba(255,255,255,0.08); }

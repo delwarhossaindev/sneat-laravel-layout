@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -22,7 +23,17 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'avatar',
+        'theme',
     ];
+
+    public function avatarUrl(): string
+    {
+        if ($this->avatar && Storage::disk('public')->exists($this->avatar)) {
+            return Storage::url($this->avatar);
+        }
+        return Storage::url('default-avatar.png');
+    }
 
     /**
      * The attributes that should be hidden for serialization.
